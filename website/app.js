@@ -4,7 +4,24 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+// const db = require('./connect.js');
+
+const knex = require('knex');
+const knexConfig = require('./knexfile');
+const db = knex(knexConfig[process.env.NODE_ENV || 'development']);
+
+// Database Migration
+db.migrate.latest()
+  .then(() => {
+    console.log('Migrationen erfolgreich ausgeführt');
+  })
+  .catch(err => {
+    console.error('Fehler beim Ausführen der Migrationen:', err);
+  });
+
+
 var indexRouter = require('./routes/index');
+var apiCategoriesRouter = require('./routes/api/categories');
 var usersRouter = require('./routes/users');
 
 var app = express();
@@ -21,6 +38,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+
+// API Categories
+app.use('/api/categories', apiCategoriesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
