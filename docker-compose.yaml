@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  express:
+    build:
+      context: ./website
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000" # Exponiere den Server auf Port 3000
+    volumes:
+      - ./website:/app # Binde das Verzeichnis für Hot-Reloading
+    depends_on:
+      - redis
+    environment:
+      REDIS_HOST: redis
+      SQLITE_DB_PATH: /data/database.sqlite
+    command: ["npm", "start", "dev"]
+
+  redis:
+    image: "redis:7.0"
+    ports:
+      - "6379:6379" # Exponiere den Redis-Server
+    volumes:
+      - redis-data:/data
+
+  sqlite:
+    image: "nouchka/sqlite3"
+    volumes:
+      - sqlite-data:/data
+    command: ["tail", "-f", "/dev/null"] # SQLite benötigt keinen laufenden Prozess
+
+volumes:
+  redis-data:
+  sqlite-data:
